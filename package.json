@@ -36,8 +36,10 @@
     "style-loader": "^3.3.1",
     "three": "^0.162.0",
     "three-bvh-csg": "^0.0.16",
-    "webpack": "^5.90.3",
-    "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   }
 }
