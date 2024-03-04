@@ -1,5 +1,5 @@
 import css from "../css/main.css";
-import model from "../resources/model.nrrd";
+import model from "../resources/stent.nrrd";
 import t1 from "../resources/cm_viridis.png";
 import t2 from "../resources/cm_gray.png";
 import * as MORPH from "../libs/morphology.js";
