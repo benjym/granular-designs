@@ -4,10 +4,10 @@ import * as DEMCGND from "../resources/DEMCGND.js";
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+// import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+// import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+// import { SAOPass } from 'three/addons/postprocessing/SAOPass.js';
+// import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 import * as SPHERES from "../libs/SphereHandler.js"
 import * as WALLS from "../libs/WallHandler.js"
@@ -27,10 +27,6 @@ let particle_volume;
 let ring;
 let t_DEM = 0;
 
-let graph_fraction = 0.5;
-// document.getElementById("stats").style.width = String(100 * graph_fraction) + '%';
-// document.getElementById("canvas").style.width = String(100 * (1 - graph_fraction)) + '%';
-
 let time_el = document.createElement('div')
 time_el.innerHTML = 't = ' + String(t_DEM.toFixed(2));
 time_el.style.position = 'absolute';
@@ -38,57 +34,15 @@ time_el.style.top = '10px';
 time_el.style.left = '10px';
 document.getElementById("stats").appendChild(time_el);
 
-// SIGNET RING v3
-// var params = {
-//     dimension: 3,
-//     N: 450,//000,
-//     // packing_fraction: 0.5,
-//     paused: false,
-//     g_mag: 100,
-//     theta: 65, // slope angle in DEGREES
-//     boundary: [{ type: 'PBC', min: 0, max: 12 },
-//     { type: 'WALL', min: 0, max: 4 },
-//     { type: 'PBC', min: 0, max: 2 }],
-//     r_max: 0.5,
-//     r_min: 0.25,
-//     pre_seg: true,
-//     gsd: 'bidisperse', // 'uniform' or 'bidisperse
-//     ratio: 0.5,
-//     lut: 'Size',
-//     quality: 6,
-//     vmax: 20, // max velocity to colour by
-//     omegamax: 20, // max rotation rate to colour by
-//     particle_opacity: 1.0,
-//     particle_density: 2700,
-//     stl: false,
-//     R_finger: 10,
-//     mesh_mode: 'objects',
-//     dt: 2e-4,
-//     render_frequency: 50,
-//     dilate: 1.1,
-//     // save_at: '0.50,5.00,50.00,500.00',
-//     save_at: '',
-//     wall: true,
-//     thickness: 1.5,
-//     coverage_angle: 90,
-//     shank: {
-//         type: 'protruding', // 'protruding' or 'cylinder'
-//         // type: 'cylinder', // 'protruding' or 'cylinder'
-//         height: 1.0,
-//         gravity_tag: true,
-//         fontsize: 1
-//     },
-//     gui: false
-// }
-
-// BAND v1
+// SIGNET RING v4
 var params = {
     dimension: 3,
-    N: 1000,
+    N: 450,//000,
+    // packing_fraction: 0.5,
     paused: false,
     g_mag: 100,
     theta: 65, // slope angle in DEGREES
-    boundary: [{ type: 'PBC', min: 0, max: 50 },
+    boundary: [{ type: 'PBC', min: 0, max: 12 },
     { type: 'WALL', min: 0, max: 4 },
     { type: 'PBC', min: 0, max: 2 }],
     r_max: 0.5,
@@ -107,21 +61,64 @@ var params = {
     mesh_mode: 'objects',
     dt: 2e-4,
     render_frequency: 50,
-    dilate: 1.2,
+    dilate: 1.1,
     // save_at: '0.50,5.00,50.00,500.00',
     save_at: '',
-    wall: false,
+    wall: true,
     thickness: 1.5,
-    coverage_angle: 360,
+    coverage_angle: 90,
     shank: {
-        // type: 'protruding', // 'protruding' or 'cylinder'
-        type: 'cylinder', // 'protruding' or 'cylinder'
+        type: 'protruding', // 'protruding' or 'cylinder'
+        // type: 'cylinder', // 'protruding' or 'cylinder'
         height: 1.0,
-        gravity_tag: true,
+        gravity_tag: false,
         fontsize: 1
     },
-    gui: true
+    gui: true,
+    rotate: false
 }
+
+// BAND v1
+// var params = {
+//     dimension: 3,
+//     N: 1000,
+//     paused: false,
+//     g_mag: 100,
+//     theta: 65, // slope angle in DEGREES
+//     boundary: [{ type: 'PBC', min: 0, max: 50 },
+//     { type: 'WALL', min: 0, max: 4 },
+//     { type: 'PBC', min: 0, max: 2 }],
+//     r_max: 0.5,
+//     r_min: 0.25,
+//     pre_seg: true,
+//     gsd: 'bidisperse', // 'uniform' or 'bidisperse
+//     ratio: 0.5,
+//     lut: 'Size',
+//     quality: 5,
+//     vmax: 20, // max velocity to colour by
+//     omegamax: 20, // max rotation rate to colour by
+//     particle_opacity: 1.0,
+//     particle_density: 2700,
+//     stl: false,
+//     R_finger: 10,
+//     mesh_mode: 'objects',
+//     dt: 2e-4,
+//     render_frequency: 50,
+//     dilate: 1.2,
+//     // save_at: '0.50,5.00,50.00,500.00',
+//     save_at: '',
+//     wall: false,
+//     thickness: 1.5,
+//     coverage_angle: 360,
+//     shank: {
+//         // type: 'protruding', // 'protruding' or 'cylinder'
+//         type: 'cylinder', // 'protruding' or 'cylinder'
+//         height: 1.0,
+//         gravity_tag: true,
+//         fontsize: 1
+//     },
+//     gui: true
+// }
 
 set_derived_properties();
 
@@ -162,13 +159,13 @@ NDDEMPhysics().then(() => {
 });
 
 async function init() {
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth * (1 - graph_fraction) / window.innerHeight, 1e-3, 100);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth * 0.5 / window.innerHeight, 1e-3, 100);
     camera.up.set(0, 1, 0);
     camera.position.set(
         (params.boundary[0].max + params.boundary[0].min) / 2.,
         // (params.boundary[1].max + params.boundary[1].min) / 2.,
         params.boundary[1].min + 1,
-        (params.boundary[2].max + params.boundary[2].min) / 2. + 6);
+        (params.boundary[2].max + params.boundary[2].min) / 2. + 8);
     camera.lookAt(new THREE.Vector3(
         (params.boundary[0].max + params.boundary[0].min) / 2.,
         // (params.boundary[1].max + params.boundary[1].min) / 2.,
@@ -176,10 +173,11 @@ async function init() {
         (params.boundary[2].max + params.boundary[2].min) / 2.));
 
 
-    camera2 = new THREE.PerspectiveCamera(50, window.innerWidth * graph_fraction / window.innerHeight, 1e-3, 100);
+    camera2 = new THREE.PerspectiveCamera(50, window.innerWidth * 0.5 / window.innerHeight, 1e-3, 100);
     camera2.up.set(0, 0, 1);
-    camera2.position.set(0, -params.R_finger, 5 * params.R_finger);
-    camera2.lookAt(new THREE.Vector3(0, -params.R_finger, 0));
+    camera2.position.set(0, -0.7 * params.R_finger, 4 * params.R_finger);
+    let controls2_target = new THREE.Vector3(0, -0.7 * params.R_finger, 0);
+    camera2.lookAt(controls2_target);
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x111);
@@ -193,7 +191,7 @@ async function init() {
     scene2.add(hemiLight.clone());
 
     const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(5, 5, 5);
+    dirLight.position.set(2 * params.R_finger, 2 * params.R_finger, 5 * params.R_finger);
     dirLight.castShadow = true;
     dirLight.shadow.camera.zoom = 2;
     scene.add(dirLight);
@@ -215,13 +213,13 @@ async function init() {
     renderer2.setPixelRatio(window.devicePixelRatio);
     renderer2.setSize(window.innerWidth * 0.5, window.innerHeight);
 
-    composer = new EffectComposer(renderer2);
-    renderPass = new RenderPass(scene2, camera2);
-    composer.addPass(renderPass);
-    saoPass = new SAOPass(scene2, camera2);
-    composer.addPass(saoPass);
-    const outputPass = new OutputPass();
-    composer.addPass(outputPass);
+    // composer = new EffectComposer(renderer2);
+    // renderPass = new RenderPass(scene2, camera2);
+    // composer.addPass(renderPass);
+    // saoPass = new SAOPass(scene2, camera2);
+    // composer.addPass(saoPass);
+    // const outputPass = new OutputPass();
+    // composer.addPass(outputPass);
 
     container = document.getElementById('canvas');
     container.appendChild(renderer.domElement);
@@ -229,82 +227,82 @@ async function init() {
     container2 = document.getElementById('stats');
     container2.appendChild(renderer2.domElement);
 
-    if (params.gui) {
-        gui = new GUI();
-        gui.width = 320;
+    gui = new GUI();
+    gui.width = 320;
 
-        const p = gui.addFolder('Particles');
+    const p = gui.addFolder('Particles');
 
-        p.add(params, 'N', 1, 5000, 1).name('Num particles').onChange(reset_sim)
-        p.add(params, 'theta', 0, 90, 0.1).name('Slope angle (deg) (W/S)').listen().onChange(() => update_slope_angle());
-        p.add(params.boundary[0], 'max', 0, 100, 0.1).name('X<sub>max</sub>').onChange(reset_sim)
-        p.add(params.boundary[1], 'max', 0, 100, 0.1).name('Y<sub>max</sub>').onChange(reset_sim)
-        p.add(params.boundary[2], 'max', 0, 100, 0.1).name('Z<sub>max</sub>').onChange(reset_sim)
-        p.add(params, 'r_min', 0, 1, 0.01).name('Min radius').onChange(reset_sim)
-        p.add(params, 'r_max', 0, 1, 0.01).name('Max radius').onChange(reset_sim)
-        p.add(params, 'gsd', ['uniform', 'bidisperse']).name('Size distribution').onChange(reset_sim)
-        p.add(params, 'ratio', 0, 1, 0.01).name('Bidisp ratio').onChange(reset_sim)
-        gui.add(params, 'lut', ['None', 'Size', 'Velocity', 'Rotation']).name('Colour by').onChange(() => SPHERES.update_particle_material(params));
-        gui.add(params, 'pre_seg').name('Pre seg').onChange(() => reset_sim());
-        gui.add(params, 'paused').name('Paused').listen();
-        gui.add(params, 'R_finger', 0, 100, 0.01).name('Inner radius')
-        gui.add(params, 'mesh_mode', ['vertices', 'objects']).name('Mesh mode')
-        gui.add(params, 'dilate', 0.5, 1.5, 0.01).name('Dilate')
-        gui.add(params, 'stl').name('Make STL').listen().onChange(() => {
-            params.paused = true;
-            MESH.make_stl(String(t_DEM.toFixed(2)) + '.stl', ring, params);
-        });
-        gui.add(params, 'save_at').name('Save at').onChange(() => { save_at = params.save_at.split(',') });
-        gui.add(params, 'wall').name('Show walls').onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        gui.add(params, 'thickness', 0, 3, 0.01).name('Thickness').onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        gui.add(params, 'coverage_angle', 0, 360, 1).name('Coverage angle').onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        const shank = gui.addFolder('Shank');
-        shank.add(params.shank, 'type', ['protruding', 'cylinder']).name('Type').onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        shank.add(params.shank, 'height', 1, 2, 0.01).onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        shank.add(params.shank, 'gravity_tag').onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        shank.add(params.shank, 'fontsize', 0, 10, 0.01).onChange(() => {
-            update_ring_params();
-            WALLS.toggle_ring_walls(params)
-        });
-        const saoFolder = gui.addFolder('SAO');
-        saoFolder.add(saoPass.params, 'output', {
-            'Default': SAOPass.OUTPUT.Default,
-            'SAO Only': SAOPass.OUTPUT.SAO,
-            'Normal': SAOPass.OUTPUT.Normal
-        }).onChange(function (value) {
-            saoPass.params.output = value;
-        });
-        saoFolder.add(saoPass.params, 'saoBias', - 1, 1);
-        saoFolder.add(saoPass.params, 'saoIntensity', 0, 1);
-        saoFolder.add(saoPass.params, 'saoScale', 0, 10);
-        saoFolder.add(saoPass.params, 'saoKernelRadius', 1, 100);
-        saoFolder.add(saoPass.params, 'saoMinResolution', 0, 1);
-        saoFolder.add(saoPass.params, 'saoBlur');
-        saoFolder.add(saoPass.params, 'saoBlurRadius', 0, 200);
-        saoFolder.add(saoPass.params, 'saoBlurStdDev', 0.5, 150);
-        saoFolder.add(saoPass.params, 'saoBlurDepthCutoff', 0.0, 0.1);
-        saoFolder.add(saoPass, 'enabled');
-
-    }
-
+    p.add(params, 'N', 1, 5000, 1).name('Num particles').onChange(reset_sim)
+    p.add(params, 'theta', 0, 90, 0.1).name('Slope angle (deg) (W/S)').listen().onChange(() => update_slope_angle());
+    p.add(params.boundary[0], 'max', 0, 100, 0.1).name('X<sub>max</sub>').onChange(reset_sim)
+    p.add(params.boundary[1], 'max', 0, 100, 0.1).name('Y<sub>max</sub>').onChange(reset_sim)
+    p.add(params.boundary[2], 'max', 0, 100, 0.1).name('Z<sub>max</sub>').onChange(reset_sim)
+    p.add(params, 'r_min', 0, 1, 0.01).name('Min radius').onChange(reset_sim)
+    p.add(params, 'r_max', 0, 1, 0.01).name('Max radius').onChange(reset_sim)
+    p.add(params, 'gsd', ['uniform', 'bidisperse']).name('Size distribution').onChange(reset_sim)
+    p.add(params, 'ratio', 0, 1, 0.01).name('Bidisp ratio').onChange(reset_sim)
+    gui.add(params, 'lut', ['None', 'Size', 'Velocity', 'Rotation']).name('Colour by').onChange(() => SPHERES.update_particle_material(params));
+    gui.add(params, 'pre_seg').name('Pre seg').onChange(() => reset_sim());
+    gui.add(params, 'paused').name('Paused').listen();
+    gui.add(params, 'quality', 1, 10, 1).name('Quality').onChange(() => {
+        reset_sim();
+        WALLS.toggle_ring_walls(params);
+    });
+    gui.add(params, 'R_finger', 0, 100, 0.01).name('Inner radius')
+    gui.add(params, 'mesh_mode', ['vertices', 'objects']).name('Mesh mode')
+    gui.add(params, 'dilate', 0.5, 1.5, 0.01).name('Dilate')
+    gui.add(params, 'stl').name('Make STL').listen().onChange(() => {
+        params.paused = true;
+        MESH.make_stl(String(t_DEM.toFixed(2)) + '.stl', ring, params);
+    });
+    gui.add(params, 'save_at').name('Save at').onChange(() => { save_at = params.save_at.split(',') });
+    gui.add(params, 'wall').name('Show walls').onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    gui.add(params, 'thickness', 0, 3, 0.01).name('Thickness').onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    gui.add(params, 'coverage_angle', 0, 360, 1).name('Coverage angle').onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    const shank = gui.addFolder('Shank');
+    shank.add(params.shank, 'type', ['protruding', 'cylinder']).name('Type').onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    shank.add(params.shank, 'height', 1, 2, 0.01).onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    shank.add(params.shank, 'gravity_tag').onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    shank.add(params.shank, 'fontsize', 0, 10, 0.01).onChange(() => {
+        update_ring_params();
+        WALLS.toggle_ring_walls(params)
+    });
+    // const saoFolder = gui.addFolder('SAO');
+    // saoFolder.add(saoPass.params, 'output', {
+    //     'Default': SAOPass.OUTPUT.Default,
+    //     'SAO Only': SAOPass.OUTPUT.SAO,
+    //     'Normal': SAOPass.OUTPUT.Normal
+    // }).onChange(function (value) {
+    //     saoPass.params.output = value;
+    // });
+    // saoFolder.add(saoPass.params, 'saoBias', - 1, 1);
+    // saoFolder.add(saoPass.params, 'saoIntensity', 0, 1);
+    // saoFolder.add(saoPass.params, 'saoScale', 0, 10);
+    // saoFolder.add(saoPass.params, 'saoKernelRadius', 1, 100);
+    // saoFolder.add(saoPass.params, 'saoMinResolution', 0, 1);
+    // saoFolder.add(saoPass.params, 'saoBlur');
+    // saoFolder.add(saoPass.params, 'saoBlurRadius', 0, 200);
+    // saoFolder.add(saoPass.params, 'saoBlurStdDev', 0.5, 150);
+    // saoFolder.add(saoPass.params, 'saoBlurDepthCutoff', 0.0, 0.1);
+    // saoFolder.add(saoPass, 'enabled');
 
     controls = new OrbitControls(camera, container);
     controls.target.x = (params.boundary[0].min + params.boundary[0].max) / 2;
@@ -317,10 +315,10 @@ async function init() {
 
 
     controls2 = new OrbitControls(camera2, container2);
-    controls2.target = new THREE.Vector3(0, -params.R_finger, 0);
-    // controls2.autoRotate = true;
+    controls2.target = controls2_target;
     // controls2.minPolarAngle = 0;
     // controls2.maxPolarAngle = 0;
+    // controls2.autoRotateSpeed = 50;
     controls2.update();
 
     window.addEventListener('resize', onWindowResize, false);
@@ -394,6 +392,19 @@ function checkKeys(event) {
         params.theta -= 0.1;
         update_slope_angle();
     }
+
+    if (event.code === 'KeyG') {
+        params.gui = !params.gui;
+        if (params.gui) {
+            gui.show();
+        } else {
+            gui.hide();
+        }
+    }
+
+    if (event.code === 'KeyR') {
+        params.rotate = !params.rotate;
+    }
 }
 
 function onWindowResize() {
@@ -407,7 +418,7 @@ function onWindowResize() {
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer2.setSize(container2.clientWidth, container2.clientHeight);
 
-    composer.setSize(container.clientWidth, container.clientHeight);
+    // composer.setSize(container.clientWidth, container.clientHeight);
 
 }
 
@@ -441,9 +452,16 @@ function animate() {
     if (controls !== undefined) { controls.update(); }
     if (controls2 !== undefined) { controls2.update(); }
 
+    if (params.rotate) {
+        ring.rotation.y = t_DEM;
+        WALLS.ring.rotation.y = t_DEM;
+    }
+
     renderer.render(scene, camera);
     // composer.render();
     renderer2.render(scene2, camera2);
+
+    // console.log(controls2.target)
 }
 
 
