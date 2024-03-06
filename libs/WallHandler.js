@@ -707,7 +707,7 @@ export async function HollowCylinder(params) {
     var outerRadius = params.R_0;
     var innerRadius = params.R_finger;
     let depth = params.boundary[2].range * params.R_0 * 2 / params.boundary[0].range;
-    let material = new THREE.MeshLambertMaterial({ color: 0x666666, side: THREE.DoubleSide });
+    let material = new THREE.MeshStandardMaterial({ color: 0x666666, side: THREE.DoubleSide, roughness: 0.0 });
     // material.wireframe = true;
 
     let geometry;
@@ -833,17 +833,17 @@ export async function HollowCylinder(params) {
 
         let text = new THREE.Mesh(
             new TextGeometry('g', { font: font, size: params.shank.fontsize, height: 0.25 * params.shank.fontsize }),
-            new THREE.MeshBasicMaterial({ color: 0x666666 })
+            new THREE.MeshStandardMaterial({ color: 0x666666 })
         )
         g.add(text);
 
         const arrow = new THREE.Mesh(
             new THREE.CylinderGeometry(0.2 * params.shank.fontsize, 0.2 * params.shank.fontsize, 5 * params.shank.fontsize, 32),
-            new THREE.MeshLambertMaterial({ color: 0x666666 })
+            new THREE.MeshStandardMaterial({ color: 0x666666 })
         );
         let arrow_head = new THREE.Mesh(
             new THREE.ConeGeometry(0.5 * params.shank.fontsize, 2 * params.shank.fontsize, 32),
-            new THREE.MeshLambertMaterial({ color: 0x666666 })
+            new THREE.MeshStandardMaterial({ color: 0x666666 })
         );
         arrow_head.position.y = -2.5 * params.shank.fontsize;
         arrow_head.rotateZ(Math.PI);

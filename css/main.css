@@ -129,6 +129,8 @@ a {
 
     #scigem_tag {
         color: white;
+        left: auto;
+        right: 5px;
     }
 
     a {

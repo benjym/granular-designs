@@ -36,7 +36,7 @@ module.exports = [{
     devServer: {
         hot: true,
         static: {
-            directory: '.'
+            directory: 'deploy'
         },
     },
     module: {

@@ -51,7 +51,7 @@ export function map_to_plane(spheres, params) {
         let x = (vertex.x - params.boundary[0].min) * scale;
         let y = (vertex.y - params.boundary[1].min) * scale;// + params.shank_height;
         let z = (vertex.z - params.boundary[2].min) * scale;
-        new_obj.position.set(x, y, z);
+        new_obj.position.set(x - params.R_0, y, z);
         // let offset_scale = 2 * r / (params.R_0 + params.R_1);
         let s = obj.scale.x * params.dilate * scale;// * params.T / params.boundary[2].range;
         // let s = obj.scale.x * params.dilate;// * offset_scale;
@@ -61,7 +61,7 @@ export function map_to_plane(spheres, params) {
 
         ring.add(new_obj);
     }
-    ring.position.set(-params.R_0, 0, 0);
+    // ring.position.set(-params.R_0, 0, 0);
 
 
     return ring
