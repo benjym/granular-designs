@@ -6,7 +6,8 @@ module.exports = [{
     mode: "development",
     // mode: "production",
     entry: {
-        'ring': './src/ring.js',
+        'segregation_ring': './src/segregation_ring.js',
+        'roughness_ring': './src/roughness_ring.js',
         'slice': './src/slice.js',
     },
     plugins: [
@@ -17,8 +18,8 @@ module.exports = [{
             title: "NDDEM Ring maker",
             favicon: "./resources/favicon.ico",
             template: "template.html",
-            filename: "ring.html",
-            chunks: ['ring']
+            filename: "segregation_ring.html",
+            chunks: ['segregation_ring']
         }),
         new HtmlWebpackPlugin({
             title: "NDDEM CT Slicer",
@@ -26,6 +27,13 @@ module.exports = [{
             template: "template.html",
             filename: "slice.html",
             chunks: ['slice']
+        }),
+        new HtmlWebpackPlugin({
+            title: "NDDEM Roughness Ring",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "roughness_ring.html",
+            chunks: ['roughness_ring']
         }),
     ],
     output: {

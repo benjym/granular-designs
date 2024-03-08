@@ -765,6 +765,10 @@ export async function HollowCylinder(params) {
             hole.absarc(0, -height, innerRadius, 0, Math.PI * 2, false);
             shape.holes.push(hole);
 
+            if (params.depth !== undefined) {
+                depth = params.depth;
+            }
+
             let bevel = 0.5;//params.thickness / 2.
             // Extrude the shape
             var extrudeSettings = {
