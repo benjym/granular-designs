@@ -56,7 +56,7 @@ var params = {
         gravity_tag: false,
         fontsize: 1
     },
-    gui: true,
+    gui: false,
     rotate: false,
     roughness: {
         intensity: 0.5,
@@ -147,6 +147,12 @@ async function init() {
     gui.add(params.roughness, 'intensity_scaling', -2, 5, 0.01).name('Roughness int scl').onChange(reset_sim);
     gui.add(params.roughness, 'length_scaling', -2, 5, 0.01).name('Roughness lgth scl').onChange(reset_sim);
     gui.add(params.roughness, 'inherit').name('Inherit roughness').onChange(reset_sim);
+
+    if (params.gui) {
+        gui.show();
+    } else {
+        gui.hide();
+    }
 
     controls = new OrbitControls(camera, container);
     controls.target = controls_target;
