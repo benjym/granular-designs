@@ -74,7 +74,7 @@ var params = {
         gravity_tag: false,
         fontsize: 1
     },
-    gui: true,
+    gui: false,
     rotate: false
 }
 
@@ -303,6 +303,12 @@ async function init() {
     // saoFolder.add(saoPass.params, 'saoBlurStdDev', 0.5, 150);
     // saoFolder.add(saoPass.params, 'saoBlurDepthCutoff', 0.0, 0.1);
     // saoFolder.add(saoPass, 'enabled');
+
+    if (params.gui) {
+        gui.show();
+    } else {
+        gui.hide();
+    }
 
     controls = new OrbitControls(camera, container);
     controls.target.x = (params.boundary[0].min + params.boundary[0].max) / 2;
