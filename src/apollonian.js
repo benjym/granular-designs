@@ -1,3 +1,5 @@
+// stolen from https://observablehq.com/@esperanc/3d-apollonian-sphere-packings
+
 import css from "../css/main.css";
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -22,8 +24,8 @@ var params = {
     quality: 6,
     dilate: 0.01,
     stl: false,
-    gui: true,
-    rotate: false,
+    gui: false,
+    rotate: true,
     generations: 8,
     minRadiusCompute: 0.005,
     maxRadiusDisplay: 0.4,
@@ -58,15 +60,19 @@ async function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x111);
 
-    const hemiLight = new THREE.HemisphereLight();
-    hemiLight.intensity = 0.35;
-    scene.add(hemiLight);
+    // const hemiLight = new THREE.HemisphereLight();
+    // hemiLight.intensity = 0.35;
+    // scene.add(hemiLight);
 
     const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(2 * params.scale, 2 * params.scale, 5 * params.scale);
+    dirLight.position.set(-5 * params.scale, 5 * params.scale, 5 * params.scale);
     dirLight.castShadow = true;
-    dirLight.shadow.camera.zoom = 2;
     scene.add(dirLight);
+
+    const dirLight2 = new THREE.DirectionalLight();
+    dirLight2.position.set(-5 * params.scale, -5 * params.scale, -5 * params.scale);
+    dirLight2.castShadow = true;
+    scene.add(dirLight2);
 
     const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
     scene.add(ambientLight);
@@ -74,6 +80,8 @@ async function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     container = document.getElementById('canvas');
     container.appendChild(renderer.domElement);
@@ -84,15 +92,19 @@ async function init() {
     gui.add(params, 'minRadiusCompute', 0.01, 0.1, 0.01).name('Min radius').onChange(reset_sim);
     gui.add(params, 'maxRadiusDisplay', 0.1, 1, 0.01).name('Max radius').onChange(reset_sim);
     gui.add(params, 'maxCenterY', -1, 1, 0.01).name('Max Y').onChange(reset_sim);
-    gui.add(params, 'quality', 1, 10, 1).name('Quality').onChange(() => {
-        reset_sim();
-    });
-    gui.add(params, 'scale', 0, 100, 0.01).name('Inner radius')
+    gui.add(params, 'quality', 1, 10, 1).name('Quality').onChange(reset_sim);
+    gui.add(params, 'scale', 0, 100, 0.01).name('Scale').onChange(reset_sim);
     gui.add(params, 'dilate', -0.5, 0.5, 0.01).name('Dilate').onChange(reset_sim);
     gui.add(params, 'stl').name('Make STL').listen().onChange(() => {
         params.paused = true;
         MESH.make_stl('apollonian.stl', spheres, params);
     });
+
+    if (params.gui) {
+        gui.show();
+    } else {
+        gui.hide();
+    }
 
     controls = new OrbitControls(camera, container);
     controls.target = controls_target;
@@ -156,7 +168,7 @@ function add_spheres() {
 
             const material = new THREE.MeshStandardMaterial();
             material.side = THREE.DoubleSide;
-            material.flatShading = true;
+            // material.flatShading = true;
 
             // let quality = parseInt(Math.pow(2, 4 * params.quality * r));
             let quality = Math.pow(2, params.quality);
@@ -192,7 +204,8 @@ function animate() {
     if (controls !== undefined) { controls.update(); }
 
     if (params.rotate) {
-        // ring.rotation.y = t_DEM;
+        // spheres.rotation.x += 0.005;
+        spheres.rotation.z += 0.005;
         // WALLS.ring.rotation.y = clock;
     }
 
