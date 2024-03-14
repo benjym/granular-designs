@@ -9,31 +9,39 @@ module.exports = [{
         'segregation_ring': './src/segregation_ring.js',
         'roughness_ring': './src/roughness_ring.js',
         'slice': './src/slice.js',
+        'apollonian': './src/apollonian.js',
     },
     plugins: [
         new webpack.ProvidePlugin({
             THREE: 'three'
         }),
         new HtmlWebpackPlugin({
-            title: "NDDEM Ring maker",
+            title: "Ring maker",
             favicon: "./resources/favicon.ico",
             template: "template.html",
             filename: "segregation_ring.html",
             chunks: ['segregation_ring']
         }),
         new HtmlWebpackPlugin({
-            title: "NDDEM CT Slicer",
+            title: "CT Slicer",
             favicon: "./resources/favicon.ico",
             template: "template.html",
             filename: "slice.html",
             chunks: ['slice']
         }),
         new HtmlWebpackPlugin({
-            title: "NDDEM Roughness Ring",
+            title: "Roughness Ring",
             favicon: "./resources/favicon.ico",
             template: "template.html",
             filename: "roughness_ring.html",
             chunks: ['roughness_ring']
+        }),
+        new HtmlWebpackPlugin({
+            title: "Apollonian Sphere Packing",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "apollonian.html",
+            chunks: ['apollonian']
         }),
     ],
     output: {
