@@ -44,6 +44,10 @@ const params = {
     quality: 6,
 }
 
+if (urlParams.has('morse')) {
+    params.morse_code = urlParams.get('morse');
+}
+
 function stringToMorse(str) {
     const morseCode = {
         'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..',
@@ -189,7 +193,7 @@ function init() {
     camera.add(dirLight);
 
     params.morse_code_converted = stringToMorse(params.morse_code);
-    time_el.innerHTML = params.morse_code_converted;
+    time_el.innerHTML = params.morse_code + ': ' + params.morse_code_converted;
 
 
 
