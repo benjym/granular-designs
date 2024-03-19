@@ -36,9 +36,9 @@ document.getElementById("canvas").appendChild(time_el);
 const params = {
     morse_code: "SOS",
     major_radius: 10,
-    minor_radius: 0.5,
+    minor_radius: 0.25,
     morse_radius: 0.5,
-    rotate: false,
+    rotate: true,
     gui: false,
     stl: false,
     quality: 6,
@@ -233,7 +233,7 @@ function init() {
         silver.needsUpdate = true;
 
         if (params.rotate) {
-            ring.rotation.y += 0.01;
+            // ring.rotation.y += 0.01;
             dots_and_dashes.rotation.y += 0.01;
             // ring.rotation.y += 0.01;
         }
