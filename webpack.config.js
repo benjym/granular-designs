@@ -10,6 +10,7 @@ module.exports = [{
         'roughness_ring': './src/roughness_ring.js',
         'slice': './src/slice.js',
         'apollonian': './src/apollonian.js',
+        'morse-code': './src/morse-code.js',
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -43,6 +44,13 @@ module.exports = [{
             filename: "apollonian.html",
             chunks: ['apollonian']
         }),
+        new HtmlWebpackPlugin({
+            title: "Morse Code",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "morse-code.html",
+            chunks: ['morse-code']
+        }),
     ],
     output: {
         path: path.resolve(__dirname, 'deploy'),
@@ -62,7 +70,7 @@ module.exports = [{
                 use: ["style-loader", "css-loader"],
             },
             {
-                test: /\.(ico|webmanifest|stl|nrrd|png)$/,
+                test: /\.(ico|webmanifest|stl|nrrd|png|jpg)$/,
                 exclude: /node_modules/,
                 use: ["file-loader?name=[name].[ext]"] // ?name=[name].[ext] is only necessary to preserve the original file name
             },

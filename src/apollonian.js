@@ -15,6 +15,14 @@ let container;
 let ring;
 let t = 0;
 
+const material = new THREE.MeshStandardMaterial({
+    color: 0xdddddd,
+    roughness: 0.5,
+    metalness: 0.2,
+    side: THREE.DoubleSide,
+    // opacity: 1.0
+});
+
 let unused = document.getElementById('stats')
 unused.style.display = 'none';
 
@@ -29,7 +37,8 @@ var params = {
     generations: 8,
     minRadiusCompute: 0.005,
     maxRadiusDisplay: 0.4,
-    maxCenterY: 0.0
+    maxCenterY: 0.0,
+    // opacity: 1.0
 }
 
 let basis = [
@@ -53,7 +62,7 @@ init();
 async function init() {
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1e-3, 100);
     // camera.up.set(0, 0, 1);
-    camera.position.set(0, 3 * params.scale, 0);
+    camera.position.set(3 * params.scale, 0, 0);
     let controls_target = new THREE.Vector3(0, 0, 0);
     camera.lookAt(controls_target);
 
@@ -62,20 +71,25 @@ async function init() {
 
     // const hemiLight = new THREE.HemisphereLight();
     // hemiLight.intensity = 0.35;
-    // scene.add(hemiLight);
+    const hemiLight = new THREE.HemisphereLight(
+        'white', // bright sky color
+        'darkslategrey', // dim ground color
+        5, // intensity
+    );
+    scene.add(hemiLight);
 
-    const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(-5 * params.scale, 5 * params.scale, 5 * params.scale);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
+    // const dirLight = new THREE.DirectionalLight();
+    // dirLight.castShadow = true;
+    // camera.add(dirLight);
+    // dirLight.position.set(-5 * params.scale, 5 * params.scale, 5 * params.scale);
 
-    const dirLight2 = new THREE.DirectionalLight();
-    dirLight2.position.set(-5 * params.scale, -5 * params.scale, -5 * params.scale);
-    dirLight2.castShadow = true;
-    scene.add(dirLight2);
+    // const dirLight2 = new THREE.DirectionalLight();
+    // dirLight2.castShadow = true;
+    // camera.add(dirLight2);
+    // dirLight2.position.set(-5 * params.scale, -5 * params.scale, -5 * params.scale);
 
-    const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
-    scene.add(ambientLight);
+    // const ambientLight = new THREE.AmbientLight(0xAAAAAA); // soft white light
+    // scene.add(ambientLight);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -95,6 +109,9 @@ async function init() {
     gui.add(params, 'quality', 1, 10, 1).name('Quality').onChange(reset_sim);
     gui.add(params, 'scale', 0, 100, 0.01).name('Scale').onChange(reset_sim);
     gui.add(params, 'dilate', -0.5, 0.5, 0.01).name('Dilate').onChange(reset_sim);
+    // gui.add(params, 'opacity', 0, 1, 0.01).name('Opacity').onChange(() => {
+    //     material.opacity = params.opacity;
+    // });
     gui.add(params, 'stl').name('Make STL').listen().onChange(() => {
         params.paused = true;
         MESH.make_stl('apollonian.stl', spheres, params);
@@ -166,10 +183,6 @@ function add_spheres() {
             if (r < params.minRadiusCompute || r > params.maxRadiusDisplay || loc[1] > params.maxCenterY) continue;
             // console.log(loc, r)
 
-            const material = new THREE.MeshStandardMaterial();
-            material.side = THREE.DoubleSide;
-            // material.flatShading = true;
-
             // let quality = parseInt(Math.pow(2, 4 * params.quality * r));
             let quality = Math.pow(2, params.quality);
             if (r < 0.1) {
@@ -194,7 +207,7 @@ function add_spheres() {
 
         }
     }
-
+    // spheres.rotateY(Math.PI / 2);
     scene.add(spheres);
 }
 
@@ -204,8 +217,8 @@ function animate() {
     if (controls !== undefined) { controls.update(); }
 
     if (params.rotate) {
-        // spheres.rotation.x += 0.005;
-        spheres.rotation.z += 0.005;
+        spheres.rotation.x += 0.01;
+        spheres.rotation.z -= 0.01;
         // WALLS.ring.rotation.y = clock;
     }
 
