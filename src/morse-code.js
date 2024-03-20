@@ -2,6 +2,8 @@ import css from "../css/main.css";
 import texture from "../resources/eso0932a.jpg";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
 
 import * as MESH from '../libs/Mesh.js';
 
@@ -38,6 +40,7 @@ const params = {
     major_radius: 10,
     minor_radius: 0.25,
     morse_radius: 0.5,
+    max_angle: 3 / 4 * 2 * Math.PI,
     rotate: true,
     gui: false,
     stl: false,
@@ -92,24 +95,32 @@ class CustomEllipticalCurve extends THREE.Curve {
 
 function createCurvedCylinder(radius, tubeRadius, angleStart, angleEnd, radialSegments) {
     const path = new CustomEllipticalCurve(radius, angleStart, angleEnd);
-    const geometry = new THREE.TubeGeometry(
+    const tubeGeometry = new THREE.TubeGeometry(
         path, Math.pow(2, params.quality), tubeRadius, radialSegments, false
     );
 
-    const mesh = new THREE.Mesh(geometry, silver);
+    // const mesh = new THREE.Mesh(geometry, silver);
 
-    // Create caps
+    // // Create caps
+    // const sphereGeometry = new THREE.SphereGeometry(tubeRadius, radialSegments, radialSegments);
+    // const cap1 = new THREE.Mesh(sphereGeometry, silver);
+    // const cap2 = new THREE.Mesh(sphereGeometry, silver);
+
+    // // Position caps at the ends of the curve
+    // cap1.position.copy(path.getPoint(0));
+    // cap2.position.copy(path.getPoint(1));
+
+    // // Add caps to the mesh
+    // mesh.add(cap1);
+    // mesh.add(cap2);
+
     const sphereGeometry = new THREE.SphereGeometry(tubeRadius, radialSegments, radialSegments);
-    const cap1 = new THREE.Mesh(sphereGeometry, silver);
-    const cap2 = new THREE.Mesh(sphereGeometry, silver);
+    const cap1 = sphereGeometry.clone().translate(...path.getPoint(0).toArray());
+    const cap2 = sphereGeometry.clone().translate(...path.getPoint(1).toArray());
 
-    // Position caps at the ends of the curve
-    cap1.position.copy(path.getPoint(0));
-    cap2.position.copy(path.getPoint(1));
-
-    // Add caps to the mesh
-    mesh.add(cap1);
-    mesh.add(cap2);
+    // Merge geometries
+    const mergedGeometry = BufferGeometryUtils.mergeGeometries([tubeGeometry, cap1, cap2]);
+    const mesh = new THREE.Mesh(mergedGeometry, silver);
 
     return mesh;
 }
@@ -117,7 +128,7 @@ function createCurvedCylinder(radius, tubeRadius, angleStart, angleEnd, radialSe
 function morseCodeToGeometries(morseCode, radius) {
     const geometries = [];
     let angle = 0;
-    const angleIncrement = 2 * Math.PI / morseCodeLength(morseCode);
+    const angleIncrement = params.max_angle / morseCodeLength(morseCode);
 
     for (let char of morseCode) {
         if (char === '.') {
@@ -132,9 +143,13 @@ function morseCodeToGeometries(morseCode, radius) {
             angle += angleIncrement;
         } else if (char === '-') {
             // console.log('DASH')
-            let offset = 2 * params.morse_radius / (2 * Math.PI);
+            let offset = 2 * params.morse_radius / params.max_angle;
             const curvedCylinder = createCurvedCylinder(
-                radius, params.morse_radius, angle + (0.5 - offset) * angleIncrement, angle + (3 - offset) * angleIncrement, Math.pow(2, params.quality)
+                radius,
+                params.morse_radius,
+                angle + (0. + offset) * angleIncrement,
+                angle + (3 - offset) * angleIncrement,
+                Math.pow(2, params.quality)
             );
             geometries.push(curvedCylinder);
             angle += 3 * angleIncrement;
@@ -177,7 +192,7 @@ function init() {
     scene.background = envMap;
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = -30;
+    camera.position.z = -2 * params.major_radius;
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -219,9 +234,14 @@ function init() {
     gui.add(params, 'morse_radius', 0.1, 2, 0.01).name('Morse Radius').onChange(() => {
         add_ring();
     });
+    gui.add(params, 'max_angle', 0.1 * Math.PI, 2 * Math.PI, 0.1 * Math.PI).name('Max Angle').onChange(() => {
+        add_ring();
+    });
     gui.add(params, 'stl').name('Make STL').listen().onChange(() => {
         params.paused = true;
-        MESH.make_stl('morse-' + params.morse_code + '.stl', dots_and_dashes, params);
+        let model = dots_and_dashes.clone();
+        model.rotation.y = 0;
+        MESH.make_stl('morse-' + params.morse_code + '.stl', model, params);
     });
 
     if (params.gui) {
