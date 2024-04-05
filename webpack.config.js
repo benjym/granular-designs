@@ -8,8 +8,10 @@ module.exports = [{
     entry: {
         'segregation_ring': './src/segregation_ring.js',
         'roughness_ring': './src/roughness_ring.js',
+        'roughness_band': './src/roughness_band.js',
         'slice': './src/slice.js',
-        'apollonian': './src/apollonian.js',
+        'apollonian_2d': './src/apollonian_2d.js',
+        'apollonian_3d': './src/apollonian_3d.js',
         'morse-code': './src/morse-code.js',
     },
     plugins: [
@@ -41,8 +43,15 @@ module.exports = [{
             title: "Apollonian Sphere Packing",
             favicon: "./resources/favicon.ico",
             template: "template.html",
-            filename: "apollonian.html",
-            chunks: ['apollonian']
+            filename: "apollonian_3d.html",
+            chunks: ['apollonian_3d']
+        }),
+        new HtmlWebpackPlugin({
+            title: "Apollonian Circle Packing",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "apollonian_2d.html",
+            chunks: ['apollonian_2d']
         }),
         new HtmlWebpackPlugin({
             title: "Morse Code",
@@ -50,6 +59,13 @@ module.exports = [{
             template: "template.html",
             filename: "morse-code.html",
             chunks: ['morse-code']
+        }),
+        new HtmlWebpackPlugin({
+            title: "Roughness Band",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "roughness_band.html",
+            chunks: ['roughness_band']
         }),
     ],
     output: {
@@ -70,7 +86,7 @@ module.exports = [{
                 use: ["style-loader", "css-loader"],
             },
             {
-                test: /\.(ico|webmanifest|stl|nrrd|png|jpg)$/,
+                test: /\.(ico|webmanifest|stl|nrrd|png|jpg|obj)$/,
                 exclude: /node_modules/,
                 use: ["file-loader?name=[name].[ext]"] // ?name=[name].[ext] is only necessary to preserve the original file name
             },

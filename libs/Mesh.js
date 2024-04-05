@@ -8,7 +8,7 @@ document.body.appendChild(link);
 
 export async function addition(a, b, mat) {
     const evaluator = new Evaluator();
-    // evaluator.attributes = ['position', 'normal'];
+    evaluator.attributes = ['position', 'normal'];
 
     let brush1 = new Brush(a, mat);
     brush1.updateMatrixWorld();
@@ -23,7 +23,7 @@ export async function addition(a, b, mat) {
 
 export async function subtraction(a, b, mat) {
     const evaluator = new Evaluator();
-    // evaluator.attributes = ['position', 'normal'];
+    evaluator.attributes = ['position', 'normal'];
 
     let brush1 = new Brush(a, mat);
     brush1.updateMatrixWorld();
