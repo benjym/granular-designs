@@ -1,10 +1,12 @@
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-import { PIDcontroller } from './PIDcontroller.js';
-import { addition, subtraction } from './Mesh.js';
-import font_file from '../resources/helvetiker_bold.typeface.json';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { ExtrudeGeometry } from "./ExtrudeGeometry.js";
+import { PIDcontroller } from './PIDcontroller.js';
+import { addition, subtraction } from './Mesh.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import font_file from '../resources/helvetiker_bold.typeface.json';
+import logo from "../resources/gd.obj";
 
 export let left, right, floor, roof, front, back;
 export let axesHelper, arrow_x, arrow_y, arrow_z;
@@ -43,6 +45,12 @@ let damped_wall_controller = new PIDcontroller(1e-4, 1e-5, 0);
 // q_controller = new PIDcontroller(1e-6,1e-5,0);
 // }
 
+async function add_logo(path) {
+    return new Promise((resolve, reject) => {
+        const loader = new OBJLoader();
+        loader.load(logo, resolve, undefined, reject);
+    });
+}
 let box = new THREE.BoxGeometry(1, 1, 1);
 
 const wall_geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -650,12 +658,37 @@ export function toggle_ring_walls(params) {
         let scene = ring.parent;
         scene.remove(ring);
         HollowCylinder(params).then(ring => {
-            scene.add(ring);
-            if (params.wall) {
-                ring.visible = true;
-            } else {
-                ring.visible = false;
-            }
+            add_logo(logo).then(logo_obj => {
+
+                console.log(logo_obj)
+                let l = logo_obj.children[0];
+
+                l.rotation.x = Math.PI / 2;
+                l.position.set(0, -1, params.depth / 2.);
+                l.scale.set(0.3, 0.3, 0.15);
+
+                l.updateMatrix();
+
+                l.geometry.applyMatrix4(l.matrix);
+                l.scale.setScalar(1);
+                l.position.set(0, 0, 0);
+                l.rotation.set(0, 0, 0);
+
+                // scene.add(l)
+
+                subtraction(ring.geometry, l.geometry, ring.material).then((v) => {
+                    ring = v;
+                    // ring.add(spheres);
+                    scene.add(ring);
+
+                    if (params.wall) {
+                        ring.visible = true;
+                    } else {
+                        ring.visible = false;
+                    }
+                })
+
+            });
         });
     }
     if (walls !== undefined) {
@@ -707,6 +740,7 @@ export async function HollowCylinder(params) {
     var outerRadius = params.R_0;
     var innerRadius = params.R_finger;
     let depth = params.boundary[2].range * params.R_0 * 2 / params.boundary[0].range;
+    params.depth = depth;
     let material = new THREE.MeshStandardMaterial({ color: 0x666666, side: THREE.DoubleSide, roughness: 0.0 });
     // material.wireframe = true;
 
@@ -719,6 +753,7 @@ export async function HollowCylinder(params) {
         shape.holes.push(hole);
 
         depth = params.T;
+        params.depth = depth;
         let bevel = 0.5;//params.thickness / 2.
         // Extrude the shape
         var extrudeSettings = {
