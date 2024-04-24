@@ -13,6 +13,7 @@ module.exports = [{
         'apollonian_2d': './src/apollonian_2d.js',
         'apollonian_3d': './src/apollonian_3d.js',
         'morse-code': './src/morse-code.js',
+        'packing': './src/packing.js',
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -66,6 +67,13 @@ module.exports = [{
             template: "template.html",
             filename: "roughness_band.html",
             chunks: ['roughness_band']
+        }),
+        new HtmlWebpackPlugin({
+            title: "Packing",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "packing.html",
+            chunks: ['packing']
         }),
     ],
     output: {

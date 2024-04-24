@@ -93,7 +93,7 @@ async function init() {
     scene.add(ambientLight);
 
     WALLS.wall_material.wireframe = false;
-    WALLS.HollowCylinder(params).then((ring) => {
+    WALLS.SignetRing(params).then((ring) => {
         scene.add(ring);
         WALLS.toggle_ring_walls(params);
     });

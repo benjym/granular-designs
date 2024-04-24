@@ -657,7 +657,14 @@ export function toggle_ring_walls(params) {
     if (ring !== undefined && ring.parent) {
         let scene = ring.parent;
         scene.remove(ring);
-        HollowCylinder(params).then(ring => {
+
+        let RingFunction;
+        if (params.shank.type === 'cylinder') {
+            RingFunction = HollowCylinder
+        } else if (params.shank.type === 'protruding') {
+            RingFunction = SignetRing
+        }
+        RingFunction(params).then(ring => {
             add_logo(logo).then(logo_obj => {
 
                 console.log(logo_obj)
@@ -745,166 +752,139 @@ export async function HollowCylinder(params) {
     // material.wireframe = true;
 
     let geometry;
-    if (params.shank.type == 'cylinder') {
-        var shape = new THREE.Shape();
-        shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, true);
-        let hole = new THREE.Path();
-        hole.absarc(0, 0, innerRadius, 0, Math.PI * 2, false);
-        shape.holes.push(hole);
 
-        depth = params.T;
-        params.depth = depth;
-        let bevel = 0.5;//params.thickness / 2.
-        // Extrude the shape
-        var extrudeSettings = {
-            depth: depth,
-            // bevelEnabled: false,
-            bevelEnabled: true,
-            bevelThickness: bevel,
-            bevelSize: bevel,
-            bevelOffset: -bevel,
-            bevelSegments: 20,
-            curveSegments: Math.pow(2, params.quality + 1), // higher because its big
-        };
-        geometry = new ExtrudeGeometry(shape, extrudeSettings);
-        ring = new THREE.Mesh(geometry, material);
-        // hole = new THREE.CylinderGeometry(innerRadius, innerRadius, depth, 32);
-    } else if (params.shank.type === 'protruding') {
-        let height = params.shank.height * params.R_0;
+    var shape = new THREE.Shape();
+    shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, true);
+    let hole = new THREE.Path();
+    hole.absarc(0, 0, innerRadius, 0, Math.PI * 2, false);
+    shape.holes.push(hole);
 
-        let radius = params.R_0;
-        let make_with_extrude = true;
-        // var width = 2 * radius; // Width of the flat top part is twice the radius
-        if (make_with_extrude) {
-            var shape = new THREE.Shape();
-            // Start from the top left corner
-            shape.moveTo(-radius, 0);
-
-            // Draw the top horizontal line to the right corner
-            shape.lineTo(radius, 0);
-
-            // Draw the right vertical line down
-            shape.lineTo(radius, -height);
-
-            // Draw the bottom semicircle
-            shape.absarc(0, -height, radius, 0, Math.PI, true);
-
-            // Draw the left vertical line up to close the shape
-            shape.lineTo(-radius, 0);
-
-            // Now you can use this shape to create geometry
-            geometry = new THREE.ShapeGeometry(shape);
-
-            let hole = new THREE.Path();
-            hole.moveTo(-innerRadius, 0);
-            hole.absarc(0, -height, innerRadius, 0, Math.PI * 2, false);
-            shape.holes.push(hole);
-
-            if (params.depth !== undefined) {
-                depth = params.depth;
-            }
-
-            let bevel = 0.5;//params.thickness / 2.
-            // Extrude the shape
-            var extrudeSettings = {
-                depth: depth,
-                // bevelEnabled: false,
-                bevelEnabled: true,
-                bevelThickness: bevel,
-                bevelSize: bevel,
-                bevelOffset: -bevel,
-                bevelSegments: 10,
-                curveSegments: Math.pow(2, params.quality + 1), // higher because its big
-                // bevelSegments: 3,
-                // curveSegments: 10
-            };
-            geometry = new ExtrudeGeometry(shape, extrudeSettings);
-            ring = new THREE.Mesh(geometry, material);
-        }
-        else {
-            let outer_ring = new THREE.CylinderGeometry(outerRadius, outerRadius, depth, Math.pow(2, params.quality + 0));
-            outer_ring.rotateX(Math.PI / 2);
-            outer_ring.translate(0, -height, depth / 2);
-
-            let hole = new THREE.CylinderGeometry(innerRadius, innerRadius, depth * 2, Math.pow(2, params.quality + 0));
-            hole.rotateX(Math.PI / 2);
-            hole.translate(0, -height, depth / 2);
-
-            // let shoulder_geom = new THREE.BoxGeometry(2 * outerRadius, height, depth);
-            let box_radius = 0.4;
-            let shoulder_geom_top = new RoundedBoxGeometry(2 * outerRadius, 2 * height / 3., depth, 5, box_radius);
-            let shoulder_geom_bot = new THREE.BoxGeometry(2 * outerRadius, 2 * height / 3., depth);
-            shoulder_geom_top.translate(0, height / 6, 0);
-            shoulder_geom_bot.translate(0, -height / 6, 0);
-            addition(shoulder_geom_top, shoulder_geom_bot, material).then((r) => {
-                let shoulder_geom = r.geometry;
-
-                shoulder_geom.translate(0, -height / 2, depth / 2);
-
-                // let outer = new THREE.Mesh(outer_ring, material);
-                // let inner = new THREE.Mesh(hole, wall_material);
-                // let shoulder = new THREE.Mesh(shoulder_geom, material);
-                params.cutOffAngle = 45;
-                params.tryKeepNormals = true;
-
-                addition(outer_ring, shoulder_geom, material).then((res) => {
-                    subtraction(res.geometry, hole, material).then((res2) => {
-                        ring.add(res2);
-                    });
-                });
-            });
+    depth = params.T;
+    params.depth = depth;
+    let bevel = 0.5;//params.thickness / 2.
+    // Extrude the shape
+    var extrudeSettings = {
+        depth: depth,
+        // bevelEnabled: false,
+        bevelEnabled: true,
+        bevelThickness: bevel,
+        bevelSize: bevel,
+        bevelOffset: -bevel,
+        bevelSegments: 20,
+        curveSegments: Math.pow(2, params.quality + 1), // higher because its big
+    };
+    geometry = new ExtrudeGeometry(shape, extrudeSettings);
+    ring = new THREE.Mesh(geometry, material);
+    // hole = new THREE.CylinderGeometry(innerRadius, innerRadius, depth, 32);
 
 
-        }
+    return ring;
+}
+
+export async function SignetRing(params) {
+
+    // Create a ring shape
+    var outerRadius = params.R_0;
+    var innerRadius = params.R_finger;
+    let depth = params.boundary[2].range * params.R_0 * 2 / params.boundary[0].range;
+    params.depth = depth;
+    let material = new THREE.MeshStandardMaterial({ color: 0x666666, side: THREE.DoubleSide, roughness: 0.0 });
+    // material.wireframe = true;
+
+    let geometry;
+
+    let height = params.shank.height * params.R_0;
+
+    let radius = params.R_0;
+
+    var shape = new THREE.Shape();
+    // Start from the top left corner
+    shape.moveTo(-radius, 0);
+
+    // Draw the top horizontal line to the right corner
+    shape.lineTo(radius, 0);
+
+    // Draw the right vertical line down
+    shape.lineTo(radius, -height);
+
+    // Draw the bottom semicircle
+    shape.absarc(0, -height, radius, 0, Math.PI, true);
+
+    // Draw the left vertical line up to close the shape
+    shape.lineTo(-radius, 0);
+
+    // Now you can use this shape to create geometry
+    geometry = new THREE.ShapeGeometry(shape);
+
+    let hole = new THREE.Path();
+    hole.moveTo(-innerRadius, 0);
+    hole.absarc(0, -height, innerRadius, 0, Math.PI * 2, false);
+    shape.holes.push(hole);
+
+    if (params.depth !== undefined) {
+        depth = params.depth;
     }
 
-    // console.log(geometry)
+    let bevel = 0.5;//params.thickness / 2.
+    // Extrude the shape
+    var extrudeSettings = {
+        depth: depth,
+        // bevelEnabled: false,
+        bevelEnabled: true,
+        bevelThickness: bevel,
+        bevelSize: bevel,
+        bevelOffset: -bevel,
+        bevelSegments: 10,
+        curveSegments: Math.pow(2, params.quality + 1), // higher because its big
+        // bevelSegments: 3,
+        // curveSegments: 10
+    };
+    geometry = new ExtrudeGeometry(shape, extrudeSettings);
+    ring = new THREE.Mesh(geometry, material);
 
-    // difference(geometry, hole).then((res) => {
-    //     // console.log(res)
-    //     ring.add(new THREE.Mesh(geometry, material));
-    // });
-
-
-
-    if (params.shank.gravity_tag && params.shank.type === 'protruding') {
-        let g = new THREE.Group();
-
-        let text = new THREE.Mesh(
-            new TextGeometry('g', { font: font, size: params.shank.fontsize, height: 0.25 * params.shank.fontsize }),
-            new THREE.MeshStandardMaterial({ color: 0x666666 })
-        )
-        g.add(text);
-
-        const arrow = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.2 * params.shank.fontsize, 0.2 * params.shank.fontsize, 5 * params.shank.fontsize, 32),
-            new THREE.MeshStandardMaterial({ color: 0x666666 })
-        );
-        let arrow_head = new THREE.Mesh(
-            new THREE.ConeGeometry(0.5 * params.shank.fontsize, 2 * params.shank.fontsize, 32),
-            new THREE.MeshStandardMaterial({ color: 0x666666 })
-        );
-        arrow_head.position.y = -2.5 * params.shank.fontsize;
-        arrow_head.rotateZ(Math.PI);
-        arrow.add(arrow_head);
-        arrow.position.x = 1.5 * params.shank.fontsize;
-        arrow.position.y = -0.5 * params.shank.fontsize;
-        arrow.rotateZ(-Math.PI * (90 - params.theta) / 180);
-
-        g.add(arrow);
-
-        g.position.x = -0.85 * params.R_0;
-        g.position.y = -0.25 * params.R_0;
-        g.position.z = depth + 0.5 * params.shank.fontsize;
-
-
-
-        // g.position.z = 0.75 * params.shank.fontsize;
-
-        // g.position.z = -0.5 * depth;
+    if (params.shank.gravity_tag) {
+        let g = gravity_tag();
         ring.add(g);
-
     }
 
     return ring;
+}
+
+function gravity_tag() {
+    let g = new THREE.Group();
+
+    let text = new THREE.Mesh(
+        new TextGeometry('g', { font: font, size: params.shank.fontsize, height: 0.25 * params.shank.fontsize }),
+        new THREE.MeshStandardMaterial({ color: 0x666666 })
+    )
+    g.add(text);
+
+    const arrow = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2 * params.shank.fontsize, 0.2 * params.shank.fontsize, 5 * params.shank.fontsize, 32),
+        new THREE.MeshStandardMaterial({ color: 0x666666 })
+    );
+    let arrow_head = new THREE.Mesh(
+        new THREE.ConeGeometry(0.5 * params.shank.fontsize, 2 * params.shank.fontsize, 32),
+        new THREE.MeshStandardMaterial({ color: 0x666666 })
+    );
+    arrow_head.position.y = -2.5 * params.shank.fontsize;
+    arrow_head.rotateZ(Math.PI);
+    arrow.add(arrow_head);
+    arrow.position.x = 1.5 * params.shank.fontsize;
+    arrow.position.y = -0.5 * params.shank.fontsize;
+    arrow.rotateZ(-Math.PI * (90 - params.theta) / 180);
+
+    g.add(arrow);
+
+    g.position.x = -0.85 * params.R_0;
+    g.position.y = -0.25 * params.R_0;
+    g.position.z = depth + 0.5 * params.shank.fontsize;
+
+
+
+    // g.position.z = 0.75 * params.shank.fontsize;
+
+    // g.position.z = -0.5 * depth;
+
+    return g
 }

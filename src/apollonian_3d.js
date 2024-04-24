@@ -1,11 +1,13 @@
 // stolen from https://observablehq.com/@esperanc/3d-apollonian-sphere-packings
 
 import css from "../css/main.css";
+import texture from "../resources/eso0932a.jpg";
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
 import * as MESH from '../libs/Mesh.js';
+import { refract, sheen } from "three/examples/jsm/nodes/Nodes.js";
 
 var urlParams = new URLSearchParams(window.location.search);
 // var clock = new THREE.Clock();
@@ -14,21 +16,16 @@ let gui, spheres;
 let container;
 let ring;
 let t = 0;
+let envMap;
 
-const material = new THREE.MeshStandardMaterial({
-    color: 0xdddddd,
-    roughness: 0.5,
-    metalness: 0.2,
-    side: THREE.DoubleSide,
-    // opacity: 1.0
-});
+
+let material;
 
 let unused = document.getElementById('stats')
 unused.style.display = 'none';
 
 var params = {
     scale: 10, // mm per max diameter
-    lut: 'Size',
     quality: 6,
     dilate: 0.01,
     stl: false,
@@ -39,7 +36,28 @@ var params = {
     maxRadiusDisplay: 0.4,
     maxCenterY: 0.0,
     // opacity: 1.0
+    animate: false,
 }
+
+let animation = [
+    { generations: 1, rotate: true, quality: 6, duration: 2000 },
+    { generations: 2, rotate: true, quality: 6, duration: 2000 },
+    { generations: 3, rotate: false, quality: 6, duration: 2000 },
+    { generations: 4, rotate: false, quality: 6, duration: 2000 },
+    { generations: 5, rotate: false, quality: 6, duration: 2000 },
+    { generations: 6, rotate: false, quality: 6, duration: 2000 },
+    { generations: 7, rotate: false, quality: 6, duration: 2000 },
+    { generations: 8, rotate: false, quality: 6, duration: 2000 },
+];
+
+let cumulativeTimes = animation.reduce((acc, curr, index) => {
+    if (index === 0) {
+        acc.push(curr.duration);
+    } else {
+        acc.push(acc[index - 1] + curr.duration);
+    }
+    return acc;
+}, []);
 
 let basis = [
     [1, 0, 0, 0, 0],
@@ -67,29 +85,42 @@ async function init() {
     camera.lookAt(controls_target);
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111);
+    // scene.background = new THREE.Color(0x111);
+    const textureLoader = new THREE.TextureLoader();
 
-    // const hemiLight = new THREE.HemisphereLight();
-    // hemiLight.intensity = 0.35;
-    const hemiLight = new THREE.HemisphereLight(
-        'white', // bright sky color
-        'darkslategrey', // dim ground color
-        5, // intensity
-    );
+    envMap = textureLoader.load(texture);
+    envMap.mapping = THREE.EquirectangularRefractionMapping;
+    envMap.colorSpace = THREE.SRGBColorSpace;
+
+    scene.background = envMap;
+
+    material = new THREE.MeshLambertMaterial({
+        // color: 0xdddddd,
+        // roughness: 0.,
+        // metalness: 1,
+        // transmission: 0.9,
+        // clearcoat: 1,
+        // sheen: 0.1,
+        emissive: 0xFFFFFF,
+        emissiveIntensity: 5,
+        reflectivity: 1,
+        refractionRatio: 0.9,
+        envMap: envMap,
+        envMapIntensity: 5.0,
+    });
+
+    const hemiLight = new THREE.AmbientLight();
+    hemiLight.intensity = 1;
     scene.add(hemiLight);
 
-    // const dirLight = new THREE.DirectionalLight();
-    // dirLight.castShadow = true;
-    // camera.add(dirLight);
-    // dirLight.position.set(-5 * params.scale, 5 * params.scale, 5 * params.scale);
+    const dirLight = new THREE.DirectionalLight();
+    dirLight.position.set(2 * params.R_finger, 2 * params.R_finger, 5 * params.R_finger);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.zoom = 2;
+    scene.add(dirLight);
 
-    // const dirLight2 = new THREE.DirectionalLight();
-    // dirLight2.castShadow = true;
-    // camera.add(dirLight2);
-    // dirLight2.position.set(-5 * params.scale, -5 * params.scale, -5 * params.scale);
-
-    // const ambientLight = new THREE.AmbientLight(0xAAAAAA); // soft white light
-    // scene.add(ambientLight);
+    const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+    scene.add(ambientLight);
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -215,6 +246,23 @@ function animate() {
 
     requestAnimationFrame(animate);
     if (controls !== undefined) { controls.update(); }
+
+    let currentTime = performance.now();
+
+
+    if (params.animate) {
+        if (t < animation.length) {
+
+            params.generations = animation[t].generations;
+            params.rotate = animation[t].rotate;
+            params.quality = animation[t].quality;
+
+            if (currentTime > cumulativeTimes[t]) { t++; reset_sim(); }
+        }
+        else {
+            params.rotate = true;
+        }
+    }
 
     if (params.rotate) {
         spheres.rotation.x += 0.01;

@@ -199,7 +199,7 @@ async function init() {
 
     WALLS.wall_material.wireframe = false;
     WALLS.createWalls(scene);
-    WALLS.HollowCylinder(params).then((ring) => {
+    WALLS.SignetRing(params).then((ring) => {
         scene2.add(ring);
         WALLS.toggle_ring_walls(params);
     });

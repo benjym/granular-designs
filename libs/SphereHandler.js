@@ -408,6 +408,17 @@ export function update_particle_material(params) {
             // console.log(radii[i])
         }
     }
+    else if (params.lut === 'envMap') {
+        for (let i = 0; i < params.N; i++) {
+            let mat = spheres.children[i].material;
+
+            mat.envMap = params.envMap;
+            mat.envMapIntensity = 5;
+            mat.roughness = 0.2;
+            mat.metalness = 1;
+            mat.color = new THREE.Color(0xFFFFFF);
+        }
+    }
     else {
         for (let i = 0; i < params.N; i++) {
             var object = spheres.children[i];
@@ -437,7 +448,11 @@ export function update_particle_material(params) {
             // object.material.color = lut.getColor( 1 - (radii[i] - params.r_min)/(params.r_max - params.r_min) )
         }
     } else if (params.lut === 'White') {
-        // do nothing, they're already white
+        let white = new THREE.Color(0xFFFFFF);
+        for (let i = 0; i < params.N; i++) {
+            var object = spheres.children[i];
+            object.material.color = white;
+        }
     } else if (params.lut === 'Black') {
         let black = new THREE.Color(0x000000);
         for (let i = 0; i < params.N; i++) {
