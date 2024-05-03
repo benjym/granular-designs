@@ -14,6 +14,7 @@ module.exports = [{
         'apollonian_3d': './src/apollonian_3d.js',
         'morse-code': './src/morse-code.js',
         'packing': './src/packing.js',
+        'pores': './src/pores.js',
     },
     plugins: [
         new webpack.ProvidePlugin({
@@ -74,6 +75,13 @@ module.exports = [{
             template: "template.html",
             filename: "packing.html",
             chunks: ['packing']
+        }),
+        new HtmlWebpackPlugin({
+            title: "Pores",
+            favicon: "./resources/favicon.ico",
+            template: "template.html",
+            filename: "pores.html",
+            chunks: ['pores']
         }),
     ],
     output: {

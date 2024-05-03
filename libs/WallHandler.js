@@ -741,13 +741,13 @@ export function toggle_ring_walls(params) {
     }
 }
 
-export async function HollowCylinder(params) {
+export async function HollowCylinder(innerRadius, outerRadius, depth, params) {
 
     // Create a ring shape
-    var outerRadius = params.R_0;
-    var innerRadius = params.R_finger;
-    let depth = params.boundary[2].range * params.R_0 * 2 / params.boundary[0].range;
-    params.depth = depth;
+    // var outerRadius = params.R_0;
+    // var innerRadius = params.R_finger;
+    // let depth = params.boundary[2].range * params.R_0 * 2 / params.boundary[0].range;
+    // params.depth = depth;
     let material = new THREE.MeshStandardMaterial({ color: 0x666666, side: THREE.DoubleSide, roughness: 0.0 });
     // material.wireframe = true;
 

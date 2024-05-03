@@ -68,6 +68,7 @@ export function map_to_plane(spheres, params) {
 }
 
 export function map_to_torus(spheres, params) {
+
     let ring = new THREE.Group();
     const vertex = new THREE.Vector3();
 
@@ -149,6 +150,90 @@ export function make_stl(filename, object, params) {
     }
 
 }
+
+export function make_inverse_stl(filename, spheres, params) {
+
+    WALLS.HollowCylinder(params.R_finger, params.R_1, params.T, params).then((box) => {
+        let filename = 'box.stl';
+        const exporter = new STLExporter();
+        const options = { binary: true }
+
+        // Parse the input and generate the STL encoded output
+        const result = exporter.parse(box, options);
+
+        if (options.binary) {
+            saveArrayBuffer(result, filename);
+        }
+        else {
+            saveString(result, filename);
+        }
+    });
+
+    let copy = new THREE.Group();
+    let v = new THREE.Vector3();
+
+    for (let obj of spheres.children) {
+        for (let i = -1; i < 2; i++) {
+            for (let j = -1; j < 2; j++) {
+                let new_obj = obj.clone();
+                // console.log(new_obj.position)
+                new_obj.getWorldPosition(v);
+                v.add(new THREE.Vector3(0, i * params.boundary[1].range, j * params.boundary[2].range));
+                new_obj.position.set(v.x, v.y, v.z);
+                if (v.y + 2 * params.r_max > params.boundary[1].min && v.y - 2 * params.r_max < params.boundary[1].max) {
+                    if (v.z + 2 * params.r_max > params.boundary[2].min && v.z - 2 * params.r_max < params.boundary[2].max) {
+                        copy.add(new_obj);
+                    }
+                }
+                // new_obj.updateMatrixWorld(true);
+                // copy.add(new_obj);
+
+            }
+        }
+    }
+
+    let mapped = map_to_torus(copy, params);
+
+    mapped.updateMatrixWorld(true);
+
+    // for (let i = 0; i < mapped.children.length; i++) {
+    // let object = mapped.children[i];
+    // object.updateMatrix();
+    // object.geometry.applyMatrix4(object.matrixWorld);
+    // object.position.set(0, 0, 0);
+    // object.rotation.set(0, 0, 0);
+    // object.scale.set(1, 1, 1);
+    // };
+    // let scene = spheres.parent;
+    // scene.add(mapped);
+
+    const exporter = new STLExporter();
+    const options = { binary: true }
+
+    // Parse the input and generate the STL encoded output
+    const result = exporter.parse(mapped, options);
+
+    if (options.binary) {
+        saveArrayBuffer(result, filename);
+    }
+    else {
+        saveString(result, filename);
+    }
+
+}
+
+// async function processChildren(box, params, object) {
+//     let i = 0;
+//     for (const child of object.children) {
+//         let c = child.clone();
+//         c.position.applyMatrix4(child.matrixWorld);
+//         console.log(c.position)
+//         console.log(i + ' / ' + object.children.length)
+//         box = await subtraction(box.geometry, c.geometry, c.material);
+//         i += 1;
+//     };
+//     return box;
+// }
 
 function save(blob, filename) {
 
