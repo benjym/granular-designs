@@ -20,7 +20,6 @@ let silver = new THREE.MeshStandardMaterial({
     envMapIntensity: 3,
     metalness: 1,
     roughness: 0,
-    reflectivity: 1,
 });
 
 let unused = document.getElementById('stats')
@@ -36,20 +35,47 @@ time_el.style.fontSize = '20px';
 time_el.style.fontFamily = 'Courier New'
 document.getElementById("canvas").appendChild(time_el);
 
+let input_el = document.createElement('input');
+input_el.id = 'input';
+input_el.style.position = 'absolute';
+input_el.style.top = '10px';
+input_el.style.left = '10px';
+input_el.style.width = '150px';
+input_el.style.color = 'black';
+input_el.style.fontSize = '20px';
+input_el.style.fontFamily = 'Montserrat';
+document.getElementById("canvas").appendChild(input_el);
+
+// input_el.style.display = 'none';
+
 const params = {
-    morse_code: "SOS",
+    morse_code: "Granular",
     major_radius: 10,
     minor_radius: 0.25,
-    morse_radius: 0.5,
+    morse_radius: 1.0,
     max_angle: 3 / 4 * 2 * Math.PI,
     rotate: true,
     gui: false,
     stl: false,
     quality: 6,
+    input: true,
 }
 
 if (urlParams.has('morse')) {
     params.morse_code = urlParams.get('morse');
+}
+
+if (params.input) {
+    input_el.style.display = 'block';
+    input_el.value = params.morse_code;
+    time_el.style.left = '200px';
+
+    input_el.addEventListener('input', (event) => {
+        params.morse_code = event.target.value;
+        params.morse_code_converted = stringToMorse(params.morse_code);
+        time_el.innerHTML = params.morse_code_converted;
+        add_ring();
+    });
 }
 
 function stringToMorse(str) {
@@ -130,12 +156,13 @@ function morseCodeToGeometries(morseCode, radius) {
     const geometries = [];
     let angle = 0;
     const angleIncrement = params.max_angle / morseCodeLength(morseCode);
+    let this_morse_radius = Math.min(params.morse_radius, radius * angleIncrement / 2.);
 
     for (let char of morseCode) {
         if (char === '.') {
             // console.log('DOT');
             const sphere = new THREE.Mesh(
-                new THREE.SphereGeometry(params.morse_radius, Math.pow(2, params.quality), Math.pow(2, params.quality)),
+                new THREE.SphereGeometry(this_morse_radius, Math.pow(2, params.quality), Math.pow(2, params.quality)),
                 silver
             );
             sphere.position.x = Math.cos(angle + angleIncrement / 2.) * radius;
@@ -144,10 +171,10 @@ function morseCodeToGeometries(morseCode, radius) {
             angle += angleIncrement;
         } else if (char === '-') {
             // console.log('DASH')
-            let offset = 2 * params.morse_radius / params.max_angle;
+            let offset = 4 * this_morse_radius / params.max_angle;
             const curvedCylinder = createCurvedCylinder(
                 radius,
-                params.morse_radius,
+                this_morse_radius,
                 angle + (0. + offset) * angleIncrement,
                 angle + (3 - offset) * angleIncrement,
                 Math.pow(2, params.quality)
@@ -192,7 +219,7 @@ function init() {
 
     scene.background = envMap;
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 100);
     camera.position.z = -2 * params.major_radius;
 
     renderer = new THREE.WebGLRenderer();
@@ -209,7 +236,8 @@ function init() {
     camera.add(dirLight);
 
     params.morse_code_converted = stringToMorse(params.morse_code);
-    time_el.innerHTML = params.morse_code + ': ' + params.morse_code_converted;
+    // time_el.innerHTML = params.morse_code + ': ' + params.morse_code_converted;
+    time_el.innerHTML = params.morse_code_converted;
 
 
 
