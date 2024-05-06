@@ -32,9 +32,9 @@ var params = {
     boundary: [{ type: 'PBC', min: 0, max: 80 },
     { type: 'WALL', min: 0, max: 3.5 },
     { type: 'PBC', min: 0, max: 6 }],
-    solid_fraction: 0.5,
-    r_max: 0.55,
-    r_min: 0.45,
+    solid_fraction: 0.65,
+    r_max: 1.0, // 0.55,
+    r_min: 0.95, // 0.45,
     pre_seg: false,
     gsd: 'uniform', // 'uniform' or 'bidisperse
     ratio: 0.5,
@@ -280,6 +280,12 @@ function checkKeys(event) {
     if (event.code === 'KeyR') {
         params.rotate = !params.rotate;
     }
+
+    if (event.code === 'KeyM') {
+        params.stl = true;
+        MESH.make_stl('packing.stl', ring, params);
+    }
+
 }
 
 function onWindowResize() {
@@ -369,7 +375,7 @@ function finish_setup() {
     S.simu_interpret_command("set Kt " + String(0.8 * vals.stiffness));
     S.simu_interpret_command("set GammaN " + String(vals.dissipation));
     S.simu_interpret_command("set GammaT " + String(vals.dissipation));
-    S.simu_interpret_command("set damping 0");
+    S.simu_interpret_command("set damping 0.001");
     S.simu_interpret_command("set Mu 0.5");
     S.simu_interpret_command("set Mu_wall 2");
     S.simu_interpret_command("set T 150");

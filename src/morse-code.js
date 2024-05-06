@@ -17,6 +17,7 @@ let envMap;
 let silver = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     envMap: envMap,
+    envMapIntensity: 3,
     metalness: 1,
     roughness: 0,
     reflectivity: 1,
