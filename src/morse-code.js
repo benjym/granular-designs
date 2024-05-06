@@ -310,6 +310,8 @@ function onWindowResize() {
 }
 
 function checkKeys(event) {
+    if (params.input) { return }
+
     if (event.code === 'KeyG') {
         params.gui = !params.gui;
         if (params.gui) {
