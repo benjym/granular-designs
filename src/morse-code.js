@@ -19,8 +19,9 @@ let silver = new THREE.MeshStandardMaterial({
     envMap: envMap,
     envMapIntensity: 3,
     metalness: 1,
-    roughness: 0,
+    roughness: 0.1,
 });
+silver.flatShading = true;
 
 let unused = document.getElementById('stats')
 unused.style.display = 'none';
@@ -51,18 +52,30 @@ document.getElementById("canvas").appendChild(input_el);
 const params = {
     morse_code: "Granular",
     major_radius: 10,
-    minor_radius: 0.25,
-    morse_radius: 1.0,
+    minor_radius: 0.35,//0.25,
+    morse_radius: 2.0,
     max_angle: 3 / 4 * 2 * Math.PI,
     rotate: true,
     gui: false,
     stl: false,
-    quality: 6,
+    quality: 3,
     input: true,
 }
 
 if (urlParams.has('morse')) {
     params.morse_code = urlParams.get('morse');
+}
+
+if (urlParams.has('gui')) {
+    params.gui = true;
+}
+
+if (urlParams.has('norotate')) {
+    params.rotate = false;
+}
+
+if (urlParams.has('stl')) {
+    params.stl = true;
 }
 
 if (params.input) {
@@ -142,8 +155,14 @@ function createCurvedCylinder(radius, tubeRadius, angleStart, angleEnd, radialSe
     // mesh.add(cap2);
 
     const sphereGeometry = new THREE.SphereGeometry(tubeRadius, radialSegments, radialSegments);
-    const cap1 = sphereGeometry.clone().translate(...path.getPoint(0).toArray());
-    const cap2 = sphereGeometry.clone().translate(...path.getPoint(1).toArray());
+    const cap1 = sphereGeometry.clone();//.translate(...path.getPoint(0).toArray());
+    const cap2 = sphereGeometry.clone();//.translate(...path.getPoint(1).toArray());
+    cap1.rotateY(-Math.PI / radialSegments / 2)
+    cap2.rotateY(-Math.PI / radialSegments / 2)
+    cap1.rotateZ(angleStart);
+    cap2.rotateZ(angleEnd);
+    cap1.translate(...path.getPoint(0).toArray());
+    cap2.translate(...path.getPoint(1).toArray());
 
     // Merge geometries
     const mergedGeometry = BufferGeometryUtils.mergeGeometries([tubeGeometry, cap1, cap2]);
@@ -157,16 +176,20 @@ function morseCodeToGeometries(morseCode, radius) {
     let angle = 0;
     const angleIncrement = params.max_angle / morseCodeLength(morseCode);
     let this_morse_radius = Math.min(params.morse_radius, radius * angleIncrement / 2.);
+    // console.log(this_morse_radius);
 
     for (let char of morseCode) {
         if (char === '.') {
             // console.log('DOT');
             const sphere = new THREE.Mesh(
-                new THREE.SphereGeometry(this_morse_radius, Math.pow(2, params.quality), Math.pow(2, params.quality)),
+                // new THREE.SphereGeometry(this_morse_radius, Math.pow(2, params.quality), Math.pow(2, params.quality)),
+                new THREE.IcosahedronGeometry(this_morse_radius, params.quality - 3),
                 silver
             );
             sphere.position.x = Math.cos(angle + angleIncrement / 2.) * radius;
             sphere.position.y = Math.sin(angle + angleIncrement / 2.) * radius;
+            sphere.rotation.x = (angle + angleIncrement / 2.)
+            sphere.lookAt(0, 0, 0);
             geometries.push(sphere);
             angle += angleIncrement;
         } else if (char === '-') {
@@ -177,7 +200,7 @@ function morseCodeToGeometries(morseCode, radius) {
                 this_morse_radius,
                 angle + (0. + offset) * angleIncrement,
                 angle + (3 - offset) * angleIncrement,
-                Math.pow(2, params.quality)
+                Math.pow(2, params.quality) - 1
             );
             geometries.push(curvedCylinder);
             angle += 3 * angleIncrement;
@@ -201,7 +224,7 @@ function add_ring() {
     geometries.forEach(geometry => dots_and_dashes.add(geometry));
 
     let ring = new THREE.Mesh(
-        new THREE.TorusGeometry(params.major_radius, params.minor_radius, Math.pow(2, params.quality), Math.pow(2, params.quality + 2)),
+        new THREE.TorusGeometry(params.major_radius, params.minor_radius, Math.pow(2, params.quality + 3), Math.pow(2, params.quality + 6)),
         silver
     );
     dots_and_dashes.add(ring);
@@ -257,10 +280,10 @@ function init() {
     gui.add(params, 'minor_radius', 0.1, 1, 0.01).name('Minor Radius').onChange(() => {
         add_ring();
     });
-    gui.add(params, 'major_radius', 1, 20, 1).name('Major Radius').onChange(() => {
+    gui.add(params, 'major_radius', 1, 50, 1).name('Major Radius').onChange(() => {
         add_ring();
     });
-    gui.add(params, 'morse_radius', 0.1, 2, 0.01).name('Morse Radius').onChange(() => {
+    gui.add(params, 'morse_radius', 0.1, 20, 0.01).name('Morse Radius').onChange(() => {
         add_ring();
     });
     gui.add(params, 'max_angle', 0.1 * Math.PI, 2 * Math.PI, 0.1 * Math.PI).name('Max Angle').onChange(() => {
