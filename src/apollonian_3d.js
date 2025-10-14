@@ -39,6 +39,15 @@ var params = {
     animate: false,
 }
 
+if (urlParams.has('quality') { params.quality = parseFloat(urlParams.get('quality'); }
+if (urlParams.has('minRadiusCompute') { params.minRadiusCompute = parseFloat(urlParams.get('minRadiusCompute'); }
+if (urlParams.has('maxRadiusDisplay') { params.maxRadiusDisplay = parseFloat(urlParams.get('maxRadiusDisplay'); }
+if (urlParams.has('maxCenterY') { params.maxCenterY = parseFloat(urlParams.get('maxCenterY'); }
+if (urlParams.has('dilate') { params.dilate = parseFloat(urlParams.get('dilate'); }
+if (urlParams.has('generations') { params.generations = parseInt(urlParams.get('generations'); }
+if (urlParams.has('animate') { params.animate = Boolean(urlParams.get('animate'); }
+
+
 let animation = [
     { generations: 1, rotate: true, quality: 6, duration: 2000 },
     { generations: 2, rotate: true, quality: 6, duration: 2000 },
